@@ -86,6 +86,8 @@
     "Android >= 4.4"
   ],
   "engines": {
-    "node": ">=12.18.0"
-  }
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "engineStrict": false
 }
