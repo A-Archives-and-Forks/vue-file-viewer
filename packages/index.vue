@@ -213,8 +213,12 @@ export default {
 
     // 作为iframe使用时，允许通过链接传参获取文件链接数据
     if (fileUrl) {
-      this.iframeFile = fileUrl
-      this.loadFromUrl(fileUrl, opt1)
+      // 如果 fileUrl 是相对路径，转换为完整 URL
+      const fullUrl = fileUrl.startsWith('http') 
+        ? fileUrl 
+        : window.location.origin + fileUrl
+      this.iframeFile = fullUrl
+      this.loadFromUrl(fullUrl, opt1)
     } else {
       const opt2 = {
         shoHead: this.shoHead,
@@ -263,13 +267,14 @@ export default {
 
       this.loading = true
       this.inputUrl = url
-      // 要预览的文件地址
-      this.uploadFileName = url.substr(url.lastIndexOf('/') + 1)
-      // 取得扩展名并统一转小写兼容大写
-      this.extend = getExtend(this.uploadFileName).toLowerCase()
+      // 从 URL 提取文件名
+      this.uploadFileName = url.substr(url.lastIndexOf('/') + 1).split('?')[0]
+      // 提取扩展名（仅用于判断是否为 Office 文件）
+      const extend = getExtend(this.uploadFileName).toLowerCase()
+      
       // 判断是否为office文件
       const isOffice = typeInfo.office.find(
-        (item) => item.indexOf(this.extend) > -1
+        (item) => item.indexOf(extend) > -1
       )
       // 判断是否需要使用外部微软第三方office在线浏览的方式
       if (options.useOfficeMicroOnline && isOffice) {
@@ -285,13 +290,14 @@ export default {
         return
       }
       // 内部渲染的方式
-      // 拼接iframe请求url
+      // 下载文件并转为 File 对象
       axios({
         url,
         method: 'get',
         responseType: 'blob'
       })
         .then(({ data }) => {
+          // 创建 File 对象，使用从 URL 提取的文件名
           const file = new File([data], this.uploadFileName, {
             type: data.type || ''
           })
@@ -306,17 +312,21 @@ export default {
           renders['notFind'](
             url,
             this.$refs.output,
-            this.extend,
+            extend,
             this.uploadFileName
           )
         })
     },
     // 从file文件流加载
     loadFromBlob(file, options = {}) {
-      // 直接下载 Blob 文件
-      this.inputUrl = file
       // 保存配置项
       this.options = Object.assign(this.options, options)
+      
+      // 如果 file 是 File 对象，保存文件名用于显示
+      if (file.name) {
+        this.uploadFileName = file.name
+        this.inputUrl = file.name
+      }
 
       this.handleChange({ target: { files: [file] } })
     },
@@ -336,23 +346,45 @@ export default {
     },
     // 文件信息处理，对应文件渲染方法
     displayResult(buffer, file) {
-      // 取得文件名
+      // 优先使用 File 对象的 name 属性
       const { name, type } = file
-      if (!name && !this.uploadFileName) {
-        this.uploadFileName = generateFilenameFromBlob(file)
+      let fileName = name
+      let extend = ''
+      
+      // 1. 如果 File 对象有 name 属性，直接使用
+      if (name) {
+        fileName = name
+        extend = getExtend(name).toLowerCase()
+      } 
+      // 2. 否则使用已有的 uploadFileName
+      else if (this.uploadFileName) {
+        fileName = this.uploadFileName
+        extend = getExtend(this.uploadFileName).toLowerCase()
       }
-      // 取得扩展名并统一转小写兼容大写
-      const extend =
-        this.extend || getExtend(this.uploadFileName).toLowerCase() || type.split('/')[1]
+      // 3. 如果都没有，从 Blob 的 type 生成文件名
+      else {
+        fileName = generateFilenameFromBlob(file)
+        extend = getExtend(fileName).toLowerCase()
+      }
+      
+      // 4. 如果还是没有扩展名，尝试从 MIME type 获取
+      if (!extend && type) {
+        extend = type.split('/')[1] || ''
+      }
+      
+      // 保存文件名
+      this.uploadFileName = fileName
+      
       // 生成新的dom
       const node = document.createElement('div')
       // 清空容器里的元素
       this.$refs.output.innerHTML = ''
       // 容器追加新的子元素
       const child = this.$refs.output.appendChild(node)
+      
       // 调用对应渲染方法进行渲染
       return new Promise((resolve, reject) =>
-        render(buffer, child, extend, name)
+        render(buffer, child, extend, fileName)
           .then(() => {
             // 渲染结束调整缩放比例
             this.$nextTick(() => {

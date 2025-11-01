@@ -128,7 +128,7 @@
             <div class="example-container">
               <div class="example-preview">
                 <iframe
-                  src="./file-viewer/index.html?fileUrl=https://file-viewer.yiwowang.com/fileTest/pdf.pdf"
+                  src="./file-viewer/index.html?fileUrl=/fileTest/pdf.pdf"
                   scrolling="auto"
                   id="file-viewer"
                   class="preview-iframe"
@@ -165,7 +165,7 @@
             <div class="example-container">
               <div class="example-preview">
                 <iframe
-                  src="./file-viewer/index.html?useOfficeMicroOnline=true&fileUrl=https://file-viewer.yiwowang.com/fileTest/word.docx"
+                  src="./file-viewer/index.html?useOfficeMicroOnline=true&fileUrl=/fileTest/word.docx"
                   scrolling="auto"
                   class="preview-iframe"
                 />
@@ -262,7 +262,7 @@ import { config } from '../config'
 
 const iframeSnippet = `
 <iframe
-  src="./file-viewer/index.html?fileUrl=https://file-viewer.yiwowang.com/fileTest/pdf.pdf"
+  src="./file-viewer/index.html?fileUrl=/fileTest/pdf.pdf"
   scrolling="auto"
   style="border:0;height: 500px;width:100%"
 />
@@ -280,7 +280,7 @@ window.addEventListener('message', (event) => {
 
 const useOfficeMicroOnlineSnippet = `
 <iframe
-  src="./file-viewer/index.html?useOfficeMicroOnline=true&fileUrl=https://file-viewer.yiwowang.com/fileTest/word.docx"
+  src="./file-viewer/index.html?useOfficeMicroOnline=true&fileUrl=/fileTest/word.docx"
   scrolling="auto"
   style="border:0;height: 500px;width:100%"
 />
@@ -307,7 +307,7 @@ export default {
         // 目标frame
         frame: null,
         // 浏览的文件url
-        url: 'https://file-viewer.yiwowang.com/fileTest/pic.png'
+        url: window.location.origin + '/fileTest/pic.png'
       }
     }
   },
@@ -389,7 +389,7 @@ export default {
 const componentSnippet2 = `
 data () {
   return {
-    file: 'https://file-viewer.yiwowang.com/fileTest/word.docx' // or 原生 File 文件对象也可以被接收
+    file: window.location.origin + '/fileTest/word.docx' // or 原生 File 文件对象也可以被接收
   }
 },
 methods: {
@@ -423,7 +423,7 @@ export default {
       installSnippet3,
       componentSnippet2,
       componentSnippet1,
-      file: 'https://file-viewer.yiwowang.com/fileTest/word.docx',
+      file: window.location.origin + '/fileTest/word.docx',
       context: {
         // 查看器的地址
         // 自己项目内部署需要将编译后的产物file-viewer放在public文件夹中使用,编译后的产物需要下载，下载链接在文档上
@@ -436,7 +436,7 @@ export default {
         // 目标frame
         frame: null,
         // 浏览的文件url
-        url: 'https://file-viewer.yiwowang.com/fileTest/pic.png'
+        url: window.location.origin + '/fileTest/pic.png'
       },
       // Tab相关数据
       activeTab: 0,

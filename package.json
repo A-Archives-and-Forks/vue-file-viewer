@@ -1,6 +1,6 @@
 {
   "name": "@zuiyouliao/vue-file-viewer",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "private": false,
   "author": "zhanghan <294333196@qq.com>",
   "license": "MIT",
@@ -16,16 +16,16 @@
   ],
   "main": "lib/index",
   "scripts": {
-    "serve": "vue-cli-service serve  --mode dev --open",
-    "build": "vue-cli-service build --mode pro",
-    "build:iframe": "vue-cli-service build --mode iframe",
-    "doc:dev": "vue-cli-service serve --mode docdev --open",
-    "doc:build": "vue-cli-service build --mode docpro",
+    "serve": "cross-env NODE_OPTIONS=--openssl-legacy-provider vue-cli-service serve  --mode dev --open",
+    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider vue-cli-service build --mode pro",
+    "build:iframe": "cross-env NODE_OPTIONS=--openssl-legacy-provider vue-cli-service build --mode iframe",
+    "doc:dev": "cross-env NODE_OPTIONS=--openssl-legacy-provider vue-cli-service serve --mode docdev --open",
+    "doc:build": "cross-env NODE_OPTIONS=--openssl-legacy-provider vue-cli-service build --mode docpro",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "@handsontable/vue": "^12.0.1",
-    "axios": "^0.27.2",
+    "axios": "^1.6.0",
     "core-js": "^3.22.7",
     "d3": "^3.5.17",
     "docx-preview": "^0.1.11",
@@ -34,7 +34,7 @@
     "jquery": "^3.6.0",
     "jszip": "^3.10.0",
     "nvd3": "^1.8.6",
-    "pdfjs-dist": "^2.15.349",
+    "pdfjs-dist": "^2.16.105",
     "qs": "^6.10.3",
     "tinycolor2": "^1.4.2",
     "v-viewer": "^1.6.4"
@@ -49,6 +49,7 @@
     "@vue/cli-plugin-eslint": "^4.5.19",
     "@vue/cli-service": "^4.5.19",
     "copy-webpack-plugin": "^5.1.2",
+    "cross-env": "10.1.0",
     "eslint": "^6.8.0",
     "eslint-plugin-vue": "^7.20.0",
     "file-loader": "6.2.0",

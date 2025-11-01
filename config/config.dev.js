@@ -2,9 +2,12 @@
  * @Author: zhanghan
  * @Date: 2022-11-28 09:13:53
  * @LastEditors: zhanghan
- * @LastEditTime: 2023-01-09 23:53:58
+ * @LastEditTime: 2024-11-01
  * @Descripttion: 开发环境配置
  */
+
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const path = require('path')
 
 module.exports = {
   pages: {
@@ -37,5 +40,19 @@ module.exports = {
 
     // 别名配置
     config.resolve.alias.set('@', '/examples').set('@packages', '/packages')
+  },
+  
+  // 配置 webpack 插件
+  configureWebpack: {
+    plugins: [
+      // 复制 pdfjs-dist 的 cmaps 文件到 public 目录
+      // copy-webpack-plugin 5.x 语法：直接传数组
+      new CopyWebpackPlugin([
+        {
+          from: path.join(__dirname, '../node_modules/pdfjs-dist/cmaps'),
+          to: path.join(__dirname, '../public/static/cmaps')
+        }
+      ])
+    ]
   }
 }

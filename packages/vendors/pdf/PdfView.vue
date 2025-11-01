@@ -28,13 +28,15 @@ export default {
     }
   },
   created() {
-    if (
-      !GlobalWorkerOptions.workerPort &&
-      typeof window !== 'undefined' &&
-      'Worker' in window
-    ) {
-      // GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@2.15.349/legacy/build/pdf.worker.min.js`
-      GlobalWorkerOptions.workerSrc = require('!!file-loader!pdfjs-dist/legacy/build/pdf.worker.min.js')
+    if (typeof window !== 'undefined' && !GlobalWorkerOptions.workerSrc) {
+      // 使用 file-loader 打包本地文件（离线可用，适合内网环境）
+      // 指定输出到 static/js/ 目录，文件名保持原样
+      const workerModule = require('!!file-loader?name=static/js/[name].[contenthash:8].js!pdfjs-dist/legacy/build/pdf.worker.min.js')
+      // file-loader 可能返回模块对象，需要取 .default 属性
+      GlobalWorkerOptions.workerSrc = workerModule.default || workerModule
+      
+      // 使用 CDN Worker 文件（备选方案，需要外网）
+      // GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/legacy/build/pdf.worker.min.js`
     }
   },
   mounted() {
@@ -82,9 +84,13 @@ export default {
       const loadingTask = getDocument({
         data: this.data,
         // 影响中文区发票预览，pdf文件的编码规则WinAnsiEncoding下的BaseFont为['Courier'] or 编码规则UniGB-UCS2-H下的BaseFont为['KaiTi_GB2312', 'SimSun', 'STSong-Light', 'STSong-Light-UniGB-UCS2-H']任意一个情形，可能会导致无法实现正常渲染，因此建议使用目前最新的编码规则
-        cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/cmaps/',
+        // 使用本地 cmaps 文件（离线可用，适合内网环境）
+        cMapUrl: process.env.BASE_URL + 'static/cmaps/',
         cMapPacked: true,
         enableXfa: true
+        
+        // 使用 CDN cmaps 文件（备选方案，需要外网）
+        // cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/cmaps/',
       })
       // 得到文档
       const pdfDocument = await loadingTask.promise

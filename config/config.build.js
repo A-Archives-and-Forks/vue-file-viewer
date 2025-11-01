@@ -2,11 +2,12 @@
  * @Author: zhanghan
  * @Date: 2022-11-28 09:13:53
  * @LastEditors: zhanghan
- * @LastEditTime: 2023-01-09 21:49:06
+ * @LastEditTime: 2024-11-01
  * @Descripttion: 生产环境配置
  */
 
 const path = require('path')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 //  获取基于当前路径的目标文件
 const resolve = (dir) => path.join(__dirname, '../', dir)
 
@@ -31,7 +32,17 @@ const buildConfig = {
       libraryExport: 'default',
       //  引用时的依赖名
       library: 'vue-file-viewer'
-    }
+    },
+    plugins: [
+      // 复制 pdfjs-dist 的 cmaps 文件
+      // copy-webpack-plugin 5.x 语法：直接传数组
+      new CopyWebpackPlugin([
+        {
+          from: path.join(__dirname, '../node_modules/pdfjs-dist/cmaps'),
+          to: path.join(__dirname, '../lib/static/cmaps')
+        }
+      ])
+    ]
   },
   css: {
     sourceMap: false,
