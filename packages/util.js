@@ -69,7 +69,7 @@ export function fileDownload(file, name) {
   }
 
   // file是url
-  if (file.indexOf('http') > -1) {
+  if (typeof file === 'string' && file.indexOf('http') > -1) {
     name = name ? name : getUrlFileName(file)
     const link = document.createElement('a')
     link.style.display = 'none'
@@ -146,4 +146,73 @@ export async function render(buffer, target, type, name) {
     return handler(...arguments)
   }
   return renders.error(...arguments)
+}
+
+/**
+ * 使用时间戳为Blob文件生成文件名
+ * @param {Blob} blob 文件
+ **/
+export function generateFilenameFromBlob(blob) {
+  // MIME类型与扩展名映射表
+  const mimes = {
+    // 富文本文档
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+    'application/pdf': 'pdf',
+
+    // 图片
+    'image/gif': 'gif',
+    'image/jpeg': 'jpg',
+    'image/jpg': 'jpg',
+    'image/png': 'png',
+    'image/bmp': 'bmp',
+    'image/tiff': 'tiff',
+    'image/tif': 'tif',
+    'image/svg+xml': 'svg',
+
+    // 文本与代码
+    'text/plain': 'txt',
+    'application/json': 'json',
+    'text/javascript': 'js',
+    'application/javascript': 'js',
+    'text/css': 'css',
+    'text/html': 'html',
+    'text/markdown': 'md',
+    'application/xml': 'xml',
+    'text/xml': 'xml',
+    'text/x-java-source': 'java',
+    'text/x-python': 'py',
+    'text/typescript': 'ts',
+    'text/tsx': 'tsx',
+    'text/jsx': 'jsx',
+    'text/x-log': 'log',
+
+    // 视频
+    'video/mp4': 'mp4',
+    'video/webm': 'webm',
+    'video/ogg': 'ogv',
+
+    // 音频
+    'audio/mpeg': 'mp3',
+    'audio/mp3': 'mp3',
+    'audio/wav': 'wav',
+    'audio/ogg': 'ogg',
+  }
+
+  // 取出扩展名，如果找不到则用 bin 作为默认
+  const ext = mimes[blob.type]
+
+  if (!ext) {
+    throw new Error('不支持该类型的文件')
+  }
+
+  // 格式化时间戳（YYYYMMDD_HHmmss）
+  const timestamp = new Date().toISOString()
+    .replace(/[-:T]/g, '')    // 去掉 - : T
+    .split('.')[0]            // 去掉毫秒
+    .replace('Z', '')
+
+  // 拼出文件名
+  return `${timestamp}.${ext}`
 }

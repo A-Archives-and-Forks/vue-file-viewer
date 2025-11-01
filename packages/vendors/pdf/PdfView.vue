@@ -15,7 +15,6 @@ import {
   PDFLinkService,
   PDFFindController
 } from 'pdfjs-dist/legacy/web/pdf_viewer'
-import PdfjsWorker from 'pdfjs-dist/legacy/build/pdf.worker'
 import './pdf.css'
 
 export default {
@@ -34,7 +33,8 @@ export default {
       typeof window !== 'undefined' &&
       'Worker' in window
     ) {
-      GlobalWorkerOptions.workerPort = new PdfjsWorker()
+      // GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@2.15.349/legacy/build/pdf.worker.min.js`
+      GlobalWorkerOptions.workerSrc = require('!!file-loader!pdfjs-dist/legacy/build/pdf.worker.min.js')
     }
   },
   mounted() {
