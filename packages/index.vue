@@ -178,7 +178,39 @@ export default {
       }
     }
   },
+  activated() {
+    // 组件激活时（从隐藏变为可见）重新计算缩放
+    this.$nextTick(() => {
+      this.bodyScale()
+    })
+  },
   mounted() {
+    // 使用 IntersectionObserver 监听组件可见性
+    if (typeof IntersectionObserver !== 'undefined') {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0) {
+            // 组件变为可见时重新计算缩放
+            this.$nextTick(() => {
+              this.bodyScale()
+            })
+          }
+        })
+      }, {
+        threshold: 0.1  // 当 10% 可见时触发
+      })
+      
+      // 观察根元素
+      if (this.$el) {
+        observer.observe(this.$el)
+      }
+      
+      // 组件销毁时取消观察
+      this.$once('hook:beforeDestroy', () => {
+        observer.disconnect()
+      })
+    }
+    
     // 作为iframe使用时，允许使用预留的消息机制发送二进制数据，必须在url后添加?name=xxx.xxx&from=xxx
     const {
       from,
@@ -237,6 +269,11 @@ export default {
     window.onload = window.onresize = () => {
       this.bodyScale()
     }
+    
+    // 组件挂载后立即计算一次缩放比例
+    this.$nextTick(() => {
+      this.bodyScale()
+    })
 
     EventBus.$on('fileLoaded', (event) => {
       this.$emit('fileLoaded', event)
@@ -253,9 +290,16 @@ export default {
     },
     // 自动缩放比例
     bodyScale() {
-      const devicewidth = document.getElementById('vue-file-viewer').clientWidth
+      // 使用 $el 访问根元素，避免 getElementById 在 v-if 场景下找不到元素
+      const element = this.$el
+      if (!element || !element.clientWidth) {
+        // 元素未渲染或宽度为 0，使用默认缩放比例
+        this.clientZoom = 1
+        return
+      }
+      const devicewidth = element.clientWidth
       const scale = devicewidth / this.safeWith // 分母——设计稿的尺寸
-      this.clientZoom = scale
+      this.clientZoom = scale > 0 ? scale : 1
     },
     // 从url加载
     loadFromUrl(url, options = {}) {
